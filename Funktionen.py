@@ -34,6 +34,8 @@ class function:
     def defaultCall(self, variableDict, looking_for):
         pass
 
+    def round(self, value):
+        return round(value, 5)
 
 #Konfidenzintervall für Mittelwert, Standardabweichung (σ) der Grundgesamtheit bekannt
 class Konfidenzintervall_my_sigma_bekannt(function):
@@ -1847,10 +1849,10 @@ class ANOVA_einfache_varianzanalyse_vollstaendige_Daten(function):
         self.variableNames = []
         #self.necessaryValues = {"Ausgang über zusammengefasste Daten" : ["MSTr", "MSE", "N", "α", "kleine Tabelle"], "Ausgang über alle Daten" : ["α", "große Tabelle"]}
         self.necessaryValues = {"Ausgang über alle Daten" : ["α", "Tukey's Test", "große Tabelle"]}
-        self.extendedExplanations = {"α" : "Signifikanzniveau des Tests",
-        "Ausgang über alle Daten" : "'true' für nicht abgelehnt, 'false' für abgelehnt",
-        "große Tabelle" : [["Stichprobe", "Wert"]],
-        "Tukey's Test" : "'true' oder 'false'"}
+        self.extendedExplanations = {"Ausgang über alle Daten" : "'true' für nicht abgelehnt, 'false' für abgelehnt",
+        "α" : "Signifikanzniveau des Tests",
+        "Tukey's Test" : "'true' oder 'false'",
+        "große Tabelle" : [["Stichprobe", "Wert"]]}
 
     def __call__(self, variableDict):
         if set(variableDict) == set(self.necessaryValues["Ausgang über alle Daten"]):
@@ -1862,8 +1864,6 @@ class ANOVA_einfache_varianzanalyse_vollstaendige_Daten(function):
 
         for key in variableDict:
             if key == "Tukey's Test":
-                variableDict[key] = True
-                continue
                 if variableDict[key].lower() in ("true", "t", "j", "ja"):
                     variableDict[key] = True
                 elif variableDict[key].lower() in ("false", "f", "n", "nein", ""):
@@ -2050,26 +2050,35 @@ class Regressionsanalyse(function):
     description = """Regressionsanalyse mit Eingabe aller gemessener Werte
     Wichtig: '1. Regressorv.' entspricht y, alle weiteren '2. Regressorv.', '3. Regressorv.',... entsprechen x₁, x₂,...
     Model: y = β₀ + β₁x₁ + β₂x₂ + β₃x₃ + β₄x₄ + ... + βₖxₖ
-    Nullhypothese der Parameter:    βᵢ = βH₀  ↔  -t<sub>krit<\sub> ≤ t* ≤ t<sub>krit<\sub>    (nicht getestet für βH₀ != 0)
+    Die Funktionen der 2. Tabelle können auch auf Eingangswerte (Regressorvektoren) angewendet werden, die nicht Teil der Stichproben sind.
+    Diese zusätzlichen Regressorvektoren können unterhalb der modellrelevanten RV in die Tabelle eingetragen werden. DAS FELD FÜR y MUSS DAFÜR LEER BLEIBEN.
+    Nullhypothese der Parameterhypothesentests:    βᵢ = βH₀  ↔  -t<sub>krit<\sub> ≤ t* ≤ t<sub>krit<\sub>    (nicht getestet für βH₀ != 0)
 
     Erklärung des Resultats:
 
     1. Tabelle, 1. Zeile: Werte der Parameter β₀,...
     2. Zeile: Radien der Konfidenzintervalle der Parameter mit Konfidenznivevau 1-α (Signifikanzniveau α).
     Gegeben sind Radien r, das Intervall ergibt sich zu [β-r ; β+r]. β liegt mit einer Wahrscheinlichkeit von 1-α in diesem Intervall.
+    Alternativ kann das Intervall so verstanden werden:
+    Wenn der zu dem β gehöhrende Wert eines Eingangsvektors (Regressorvektors) x<sub>0<\sub> um 1 zunimmt, ändert sich das Resultat y mit einer Wahrscheinlichkeit von 1-α um einen Wert in dem Intervall.
+    3. Zeile: Hypothesentests der einzelnen Parameter. Angen: H₀ kann nicht abgelehnt werden, abgel: H₀ wird abgelehnt.
 
-    2. Tabelle, 1. Zeile: Werte der Modelausgänge y\u0302₀,...
+    2. Tabelle, 1. Zeile: Werte der Modelausgänge y\u0302<sub>1...n<\sub> für die Regressorvektoren (Zeilen in der Tabelle) x<sub>1...n<\sub>.
     2./3. Zeile: Radien der Konfidenzintervalle/Prädiktionsintervalle der Modelausgänge mit Konfidenznivevau 1-α (Signifikanzniveau α).
-    Gegeben sind Radien r, das Intervall ergibt sich zu [y\u0302-r ; y\u0302+r]. y\u0302 liegt mit einer Wahrscheinlichkeit von 1-α im Konfidenzintervall.
-    Die nächste Messung von y\u0302 liegt mit einer Wahrscheinlichkeit von 1-α im Prädiktionsintervall.
+    Gegeben sind Radien r, das Intervall ergibt sich zu [y\u0302-r ; y\u0302+r].
+    y\u0302 liegt für die Eingangswerte, die im entsprechenden Regressorvektor x (Zeilen in der Tabelle) gegeben sind, mit einer Wahrscheinlichkeit von 1-α im Konfidenzintervall.
+    Die nächste Messung von y\u0302 liegt für die Eingangswerte, die im entsprechenden Regressorvektor x gegeben sind, mit einer Wahrscheinlichkeit von 1-α im Prädiktionsintervall.
 
 
     B.S. 107"""
     def __init__(self):
         self.variableNames = []
-        self.necessaryValues = {"Ausgang" : ["α", "βH₀", "große Tabelle"]}
-        self.extendedExplanations = {"α" : "Signifikanzniveau der diversen Tests",
+        self.necessaryValues = {"Ausgang" : ["α", "βH₀", "Tukey's Test", "Parametergruppe", "große Tabelle"]}
+        self.extendedExplanations = {"Ausgang" : "",
+        "α" : "Signifikanzniveau der diversen Tests",
         "βH₀" : "Nullhypothese aller Hypothesentests der Parameter",
+        "Tukey's Test" : "'true' oder 'false'",
+        "Parametergruppe" : "Parameter, die zusammen getestet werden. Gegeben durch Indexe von 0 bis k, getrennt durch Beistriche.",
         "große Tabelle" : [["Regressorv.", "Wert"]]}
 
     def __call__(self, variableDict):
@@ -2081,10 +2090,31 @@ class Regressionsanalyse(function):
             raise Exception()
 
         for key in variableDict:
-            if key == "große Tabelle":
-                #self.tableList = [[13.1,15.0,14.0,14.4,14.0,11.6], [16.3,15.7,17.2,14.9,14.4,17.2], [13.7,13.9,12.4,13.8,14.9,13.3], [15.7,13.7,14.4,16.0,13.9,14.7], [13.5,13.4,13.2,12.7,13.4,12.3]]
-                #self.tableList = [[26.8, 27.9, 23.7, 25.0, 26.3, 24.8, 25.7, 24.5], [26.4, 24.2, 28.0, 26.9, 29.1], [25.7, 27.2, 29.9, 28.5, 29.4, 28.3]]
-                self.tableList = [[1.0, 5.0], [2.0, 6.0], [3.0, 7.0], [4.0, 8.0]]
+            if key == "Parametergruppe":
+                if variableDict[key] in ("", None):
+                    variableDict[key] = None
+                else:
+                    foo = variableDict[key].split(",")
+                    foo = [x.strip() for x in foo]
+                    try:
+                        for i in range(len(foo)):
+                            x = foo[i]
+                            foo[i] = int(x)
+                    except ValueError as e:
+                        raise Exception(f"Unexpected value {x} for {key}")
+                    variableDict[key] = foo
+
+            elif key == "Tukey's Test":
+                if variableDict[key].lower() in ("true", "t", "j", "ja"):
+                    variableDict[key] = True
+                elif variableDict[key].lower() in ("false", "f", "n", "nein", ""):
+                    variableDict[key] = False
+                else:
+                    raise Exception(f"Unexpected value '{variableDict[key]}' for {key}")
+
+            elif key == "große Tabelle":
+                #self.tableList = [[1.0, 5.0, 9.0, 11.0, 3.0], [2.0, 6.0, 11.0, 25.0, 2.0], [3.0, 7.0, 12.0, 13.0, 9.0]]
+                self.tableList = [[0.12, 0.28, 0.55, 0.68, 0.85, 1.02, 1.15, 1.34, None, 1.29, None], [4.0, 8.7, 12.7, 19.1, 21.4, 24.6, 28.9, 29.8, 100, 30.5, 20]]
                 variableDict[key] = self.tableList
                 continue
                 tableModel = variableDict[key]
@@ -2105,13 +2135,13 @@ class Regressionsanalyse(function):
                         cell = column[j]
                         if cell == "":
                             cell = None
-                            raise Exception(f"Cell must not be empty")
+                            #raise Exception(f"Cell must not be empty")
                         else:
                             try:
                                 cell = float(cell.replace(",", "."))
                             except ValueError:
                                 raise Exception(f"The value {cell} for {i}x{j} is unexpected!")
-                            self.tableList[i].append(cell)
+                        self.tableList[i].append(cell)
                 variableDict[key] = self.tableList
 
             elif variableDict[key] == "":
@@ -2127,18 +2157,35 @@ class Regressionsanalyse(function):
 
     def defaultCall(self, variableDict, looking_for):
         if looking_for == "Ausgang":
-            Tabelle = [[1.0, 5.0, 9.0, 11.0, 3.0], [2.0, 6.0, 11.0, 25.0, 2.0], [3.0, 7.0, 12.0, 13.0, 9.0]]
-
             additionalResult = {}
-            Tabelle.insert(1, [1.0 for x in Tabelle[1]])
             subscript = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
+
+            Tabelle = variableDict["große Tabelle"]
+            #Tabelle = [[1.0, 5.0, 9.0, 11.0, 3.0], [2.0, 6.0, 11.0, 25.0, 2.0], [3.0, 7.0, 12.0, 13.0, 9.0]]#, [4.0, 8.0, 1.0, 4.0, 7.0]]
+            #Tabelle = [[0.12, 0.28, 0.55, 0.68, 0.85, 1.02, 1.15, 1.34, 1.29], [4.0, 8.7, 12.7, 19.1, 21.4, 24.6, 28.9, 29.8, 30.5]]
+            print("Tabelle: ", Tabelle)
+            print("================================")
+            Tabelle.insert(1, [1.0 for x in Tabelle[1]])
 
             all_y_list = Tabelle[0]
             all_x_list_list = Tabelle[1:]
 
             y_Vektor = np.array(all_y_list)
             X_Matrix = np.column_stack(all_x_list_list)
-            X_Matrix_trans = np.array(all_x_list_list)
+            NoneRows = np.where(y_Vektor == None)[0]
+            NotNoneRows = np.where(y_Vektor != None)[0]
+            y_Vektor = np.delete(arr=y_Vektor, obj=NoneRows, axis=0)
+            additionalRVs = np.delete(arr=X_Matrix, obj=NotNoneRows, axis=0)
+            X_Matrix = np.delete(arr=X_Matrix, obj=NoneRows, axis=0)
+            X_Matrix_trans = X_Matrix.transpose()
+            print("y_Vektor: ", y_Vektor)
+            print("================================")
+            print("X_Matrix: \n", X_Matrix)
+            print("================================")
+            print("additionalRVs: \n", additionalRVs)
+            print("================================")
+            print("X_Matrix transponiert: \n", X_Matrix_trans)
+            print("================================")
 
             n = y_Vektor.shape[0]
             if n != X_Matrix.shape[0]:
@@ -2146,92 +2193,263 @@ class Regressionsanalyse(function):
             k = X_Matrix.shape[1]
             p = k + 1
             v = n - p
+            print("n: ", n)
+            print("================================")
+            print("k: ", k)
+            print("================================")
+            print("p: ", p)
+            print("================================")
 
             P_Matrix = np.linalg.inv((np.dot(X_Matrix_trans, X_Matrix)))
+            print("P_Matrix: \n", P_Matrix)
+            print("================================")
 
             foo = np.dot(P_Matrix, X_Matrix_trans)
             beta_dach = np.dot(foo, y_Vektor)
+            print("beta_dach: ", beta_dach)
+            print("================================")
 
             y_dach_Vektor = np.dot(X_Matrix, beta_dach)
+            print("y_dach_Vektor: ", y_dach_Vektor)
+            print("================================")
+            y_strich_Skalar = sum([y_Vektor[i] for i in range(n)]) / n # Durchschnitt
+            print("y_strich_Skalar: ", y_strich_Skalar)
+            print("================================")
 
             e_Vektor = y_Vektor - y_dach_Vektor
+            print("e_Vektor: ", e_Vektor)
+            print("================================")
 
             SSE = np.dot(e_Vektor, e_Vektor)
+            print("SSE: ", SSE)
+            print("================================")
+            SST = sum([(y_Vektor[i] - y_strich_Skalar)**2 for i in range(n)])
+            print("SST: ", SST)
+            print("================================")
+            SSR = sum([(y_dach_Vektor[i] - y_strich_Skalar)**2 for i in range(n)])
+            print("SSR: ", SSR)
+            print("================================")
+            MSR = SSR / (p - 1)
+            print("MSR: ", MSR)
+            print("================================")
+            MSE = SSE / (n - p)
+            print("MSE: ", MSE)
+            print("================================")
+            R_quadrat_Skalar = 1 - SSE / SST # 1 für perfektes Modell, 0 für nutzloses Modell, wird ungenau bei wachsender Modellordnung k
+            print("R_quadrat_Skalar: ", R_quadrat_Skalar)
+            print("================================")
+            R_quadrat_angepasst_Skalar = 1 - (n - 1) / (n - p) * (1 - R_quadrat_Skalar) # 1 für perfektes Modell, 0 für nutzloses Modell
+            print("R_quadrat_angepasst_Skalar: ", R_quadrat_angepasst_Skalar)
+            print("================================")
 
             Varianz_e = SSE / (n - p)
+            print("Varianz_e: ", Varianz_e)
+            print("================================")
             Standardabweichung_e = math.sqrt(Varianz_e)
+            print("Standardabweichung_e: ", Standardabweichung_e)
+            print("================================")
 
-            #Konfidenzintervall der einzelenen betas:
-            data1 = {"1" : {}, "2" : {}}
+
+            #Konfidenzintervall der einzelenen betas
+            #Hypothesentests der einzelenen betas gegen Hβ₀
+            data1 = {"1" : {}, "2" : {}, "3" : {}}
             for i in range(len(beta_dach)):
                 r = t.ppf(variableDict["α"]/2, v) * Standardabweichung_e * math.sqrt(P_Matrix[i, i])
+                tStern = (beta_dach[i] - variableDict["βH₀"]) / Standardabweichung_e / math.sqrt(P_Matrix[i, i])
                 data1["1"][f"β{i}".translate(subscript)] = f"{beta_dach[i]}"
                 data1["2"][f"β{i}".translate(subscript)] = f"± {abs(r)}"
 
-            #Konfidenzintervall und Prädiktionsintervall der Modelausgänge:
+                krit_links = t.ppf(variableDict["α"]/2, v) # links
+                krit_rechts =  t.ppf(1 - variableDict["α"]/2, v) # rechts
+                if krit_links <= tStern <= krit_rechts:
+                    text = f"βH₀ angen.: {krit_links} ≤ {tStern} ≤ {krit_rechts}"
+                elif krit_links > tStern:
+                    text = f"βH₀ abgel.: {krit_links} \u2270 {tStern} ≤ {krit_rechts}"
+                elif tStern > krit_rechts:
+                    text = f"βH₀ abgel.: {krit_links} ≤ {tStern} \u2270 {krit_rechts}"
+                else:
+                    raise Exception()
+                data1["3"][f"β{i}".translate(subscript)] = text
+            print("data1: ", data1)
+            print("================================")
+
+            #Konfidenzintervall der Modelausgänge
+            #Prädiktionsintervall der Modelausgänge
             data2 = {"1" : {}, "2" : {}, "3" : {}}
             for i in range(len(X_Matrix)):
                 x = X_Matrix[i]
+                print("x1: ", x)
                 r1 = t.ppf(variableDict["α"]/2, v) * Standardabweichung_e * math.sqrt(np.dot(x, np.dot(P_Matrix, x.transpose())))
                 r2 = t.ppf(variableDict["α"]/2, v) * Standardabweichung_e * math.sqrt(1 + np.dot(x, np.dot(P_Matrix, x.transpose())))
                 data2["1"][f"y\u0302{i+1}".translate(subscript)] = f"{y_dach_Vektor[i]}"
                 data2["2"][f"y\u0302{i+1}".translate(subscript)] = f"± {abs(r1)}"
                 data2["3"][f"y\u0302{i+1}".translate(subscript)] = f"± {abs(r2)}"
-
-
-
-
-            print("Tabelle: ", Tabelle)
-            print("========")
-            print("y_Vektor: ", y_Vektor)
-            print("========")
-            print("X_Matrix: ", X_Matrix)
-            print("========")
-            print("X_Matrix_trans: ", X_Matrix_trans)
-            print("========")
-            print("P_Matrix: ", P_Matrix)
-            print("========")
-            print("beta_dach: ", beta_dach)
-            print("========")
-            print("y_dach_Vektor: ", y_dach_Vektor)
-            print("========")
-            print("e_Vektor: ", e_Vektor)
-            print("========")
-            print("SSE: ", SSE)
-            print("========")
-            print("Varianz_e: ", Varianz_e)
-            print("========")
-            print("data1: ", data1)
-            print("========")
+            data2["1"][f""] = f""
+            data2["2"][f""] = f""
+            data2["3"][f""] = f""
+            #Konfidenzintervall für die zusätzlichen Regressionsvektoren
+            #Prädiktionsintervall für die zusätzlichen Regressionsvektoren
+            for j in range(len(additionalRVs)):
+                x = additionalRVs[j]
+                print("x2: ", x)
+                r1 = t.ppf(variableDict["α"]/2, v) * Standardabweichung_e * math.sqrt(np.dot(x, np.dot(P_Matrix, x.transpose())))
+                r2 = t.ppf(variableDict["α"]/2, v) * Standardabweichung_e * math.sqrt(1 + np.dot(x, np.dot(P_Matrix, x.transpose())))
+                data2["1"][f"Zusätzl. Wert {j+1}"] = f"{np.dot(beta_dach, x.transpose())}"
+                data2["2"][f"Zusätzl. Wert {j+1}"] = f"± {abs(r1)}"
+                data2["3"][f"Zusätzl. Wert {j+1}"] = f"± {abs(r2)}"
+                #data2["1"][f"y\u0302{i+j+1}".translate(subscript)] = f"{y_dach_Vektor[i]}"
+                #data2["2"][f"y\u0302{i+j+1}".translate(subscript)] = f"± {abs(r1)}"
+                #data2["3"][f"y\u0302{i+j+1}".translate(subscript)] = f"± {abs(r2)}"
             print("data2: ", data2)
+            print("================================")
 
+            #Test auf globale Signifikanz des Models (ANOVA)
+            fStern = MSR / MSE
+            krit = f.ppf(1-variableDict["α"], p - 1, n - p)
+            result = fStern >= krit
+            data3 = {
+            "1" : {"Steuung" : "Treatments", "Freiheitsgrade" : f"p-1={p - 1}", "Quadratsumme" : f"SSR={SSR}", "Mittlere Quadratsumme" : f"MSR={MSR}", "f-Wert" : f"MSR/MSE={fStern}"},
+            "2" : {"Steuung" : "Fehler", "Freiheitsgrade" : f"n-p={n - p}", "Quadratsumme" : f"SSE={SSE}", "Mittlere Quadratsumme" : f"MSE={MSE}", "f-Wert" : f""},
+            "3" : {"Steuung" : "Total", "Freiheitsgrade" : f"n-1={n-1}", "Quadratsumme" : f"SST={SST}", "Mittlere Quadratsumme" : f"", "f-Wert" : f""}
+            }
+            print("fStern: ", fStern)
+            print("================================")
+            print("krit: ", krit)
+            print("================================")
+            print("data3: ", data3)
+            print("================================")
+            if not result:
+                additionalResult[looking_for] = "True, H₀ wird nicht abgelehnt, alle Parameter β unterscheiden sich nicht signifikant von 0"
+                additionalResult["Teststatistik"] = fStern
+                additionalResult["Kritischer Wert"] = krit
+            elif result:
+                additionalResult[looking_for] = "False, H₀ wird abgelehnt, mindestens ein Parameter β unterscheidet sich signifikant von 0"
+                additionalResult["Teststatistik"] = fStern
+                additionalResult["Kritischer Wert"] = krit
+
+
+            #Tukey's Test
+            if variableDict["Tukey's Test"] == True:
+                score = []
+                group = []
+                for i in range(len(Tabelle)):
+                    score = score + Tabelle[i]
+                    group = group + [f"Probe {i+1}" for j in range(len(Tabelle[i]))]
+                dataFrame = pd.DataFrame({"score" : score, "group"  : group})
+                tukey = MultiComparison(data=dataFrame['score'], groups=dataFrame['group']).tukeyhsd(alpha=variableDict["α"])
+
+                i = len(variableDict["X\u0304ᵢ"]) - 1
+                j = 1
+                couples = []
+                var1 = list(tukey.reject)
+                for avg in variableDict["X\u0304ᵢ"]:
+                    var2 = var1[:i]
+                    var1 = var1[i:]
+                    k = j+1
+                    for boo in var2:
+                        if not boo:
+                            couples.append({j, k})
+                        k += 1
+                    j += 1
+                    i -= 1
+
+                sortet_indizes = np.argsort(variableDict["X\u0304ᵢ"])
+                subscript = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
+                text = ""
+                text2 = [" " * 5 * len(sortet_indizes) for i in range(len(sortet_indizes)-1)]
+                for i in sortet_indizes:
+                    text = text + " < " + (f"X\u0304{i+1}").translate(subscript)
+
+                repl = "‾‾‾‾‾"
+                leng = len(repl)
+                i = 0
+                sortet_indizes2 = sortet_indizes.copy()
+                for ind1 in sortet_indizes:
+                    sortet_indizes2 = sortet_indizes2[1:]
+                    j = i
+                    for ind2 in sortet_indizes2:
+                        if j == i:
+                            text2[i] = text2[i][:leng*j+3] + "‾‾" + text2[i][leng*(j+1):]
+                            j += 1
+                        try:
+                            couples.remove({ind1+1, ind2+1})
+                            text2[i] = text2[i][:leng*j] + repl + text2[i][leng*(j+1):]
+                        except ValueError:
+                            pass
+                        j += 1
+                    i += 1
+
+                text3 = text[3:]
+                for tex in text2:
+                    text3 = text3 + "\n" + tex[3:]
+
+                print(text3)
+                additionalResult["\nTukey's Test"] = (str(tukey), )
+
+
+            #Test für Paramtergruppe
+            print("\n\n================================")
+            print("================================")
+            print("Test für Paramtergruppe")
+            print("================================")
+            print("================================")
+            Params = variableDict["Parametergruppe"]
+            NotParams = [i for i in range(X_Matrix.shape[1]) if i not in Params]
+            X_Matrix_r = np.delete(arr=X_Matrix, obj=NotParams, axis=1)
+            print("X_Matrix_r: \n", X_Matrix_r)
+            print("================================")
+            X_Matrix_r_trans = X_Matrix_r.transpose()
+            print("X_Matrix_r_trans: ", X_Matrix_r_trans)
+            print("================================")
+            P_Matrix_r = np.linalg.inv((np.dot(X_Matrix_r_trans, X_Matrix_r)))
+            print("P_Matrix_r: ", P_Matrix_r)
+            print("================================")
+            beta_dach_r = np.dot(P_Matrix_r, np.dot(X_Matrix_r_trans, y_Vektor))
+            print("beta_dach_r: ", beta_dach_r)
+            print("================================")
+            r = len(beta_dach_r)
+            print("r: ", r)
+            print("================================")
+            SSE_r = np.dot(y_Vektor.transpose(), y_Vektor) - np.dot(beta_dach_r.transpose(), np.dot(X_Matrix_r.transpose(), y_Vektor))
+            print("SSE_r: ", SSE_r)
+            print("================================")
+            fStern = ((SSE_r - SSE) / (p - r)) / (SSE / (n - p))
+            print("fStern: ", fStern)
+            print("================================")
+            krit = f.ppf(1-variableDict["α"], p - r, n - p)
+            result = fStern >= krit
+            print("krit: ", krit)
+            print("================================")
+            print("data3: ", data3)
+            print("================================")
+            if not result:
+                additionalResult["Ausgang Paramtergruppe"] = f"True, H₀ wird nicht abgelehnt, alle Parameter β aus der Paramtergruppe unterscheiden sich nicht signifikant von 0, im Modell kann auf β ∈ {Params} verzichtet werden"
+                additionalResult["Teststatistik Paramtergruppe"] = fStern
+                additionalResult["Kritischer Wert Paramtergruppe"] = krit
+            elif result:
+                additionalResult["Ausgang Paramtergruppe"] = f"False, H₀ wird abgelehnt, mindestens ein Parameter β aus der Paramtergruppe unterscheidet sich signifikant von 0, β ∈ {Params} beinflussen das Resultat signifikant"
+                additionalResult["Teststatistik Paramtergruppe"] = fStern
+                additionalResult["Kritischer Wert Paramtergruppe"] = krit
+
+
+
+
+
+
+
+
+
+
+            print("additionalResult: ", additionalResult)
+            print("================================")
 
             foo = {"data1" : data1,
-            "data2" : data2}
+            "data2" : data2,
+            "data3" : data3}
 
             return {**foo, **additionalResult}
 
 
-
-
-
-
-
-
-
-
-"""
-Probe 1 Probe 2   2.2667 0.0032  0.6459  3.8874   True
-Probe 1 Probe 3  -0.0167    0.9 -1.6374  1.6041  False
-Probe 1 Probe 4     1.05 0.3421 -0.5707  2.6707  False
-Probe 1 Probe 5     -0.6 0.7888 -2.2207  1.0207  False
-Probe 2 Probe 3  -2.2833 0.0029 -3.9041 -0.6626   True
-Probe 2 Probe 4  -1.2167 0.2107 -2.8374  0.4041  False
-Probe 2 Probe 5  -2.8667  0.001 -4.4874 -1.2459   True
-Probe 3 Probe 4   1.0667 0.3268 -0.5541  2.6874  False
-Probe 3 Probe 5  -0.5833 0.8052 -2.2041  1.0374  False
-Probe 4 Probe 5    -1.65 0.0446 -3.2707 -0.0293   True
-"""
 
 
 

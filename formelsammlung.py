@@ -154,7 +154,7 @@ class main(tk.Tk):
             if type(value) == list:
                 frame = tk.Frame(master=self.inputFrame)
                 frame.grid(row=0, column=2*i)
-                self.inputFrame.grid_columnconfigure(2*i, weight=2)
+                self.inputFrame.grid_columnconfigure(2*i, weight=50)
                 foo = {x : "" for x in value}
                 data = {"1" : foo}
                 cols = len(value)
@@ -170,7 +170,7 @@ class main(tk.Tk):
                 self.toolTip.bind(label, str(value))
 
                 var = tk.StringVar(master=self.inputFrame)
-                entry = tk.Entry(master=self.inputFrame, textvariable=var, font=self.defaultFont, state=tk.DISABLED)
+                entry = tk.Entry(master=self.inputFrame, textvariable=var, font=self.defaultFont, state=tk.DISABLED, width=15)
                 entry.grid(row=0, column=2*i+1)
                 self.inputFrame.grid_columnconfigure(2*i+1, weight=1)
 
@@ -252,8 +252,6 @@ class main(tk.Tk):
                         table = tkt.TableCanvas(frame, data=value, rows=rows, height=20*rows)
                         table.adjustColumnWidths()
                         table.show()
-                        table.adjustColumnWidths()
-                        table.redraw()
                         i+=1
             else:
                 raise Exception(f"Type of value is {type(value)}")
@@ -289,7 +287,7 @@ class main(tk.Tk):
                 if type(value[0]) == str:
                     frame = tk.Frame(master=self.inputFrame)
                     frame.grid(row=0, column=2*i, sticky="WE")
-                    self.inputFrame.grid_columnconfigure(2*i, weight=2)
+                    self.inputFrame.grid_columnconfigure(2*i, weight=50)
                     foo = {x : "" for x in value}
                     data = {"1" : foo}
                     cols = len(value)
@@ -303,7 +301,7 @@ class main(tk.Tk):
 
                     frame = tk.Frame(master=self.inputFrame)
                     frame.grid(row=0, column=2*i, sticky="WE")
-                    self.inputFrame.grid_columnconfigure(2*i, weight=2)
+                    self.inputFrame.grid_columnconfigure(2*i, weight=50)
                     foo = {f"1. {value[0]}" : ""}
                     data = {f"{value[1]}" : foo}
                     table = tkt.TableCanvas(frame, data=data, width=150, height=200, cellwidth=150, rowheaderwidth=15, cols=1, rows=1)
@@ -318,7 +316,7 @@ class main(tk.Tk):
                 self.toolTip.bind(label, str(value))
 
                 var = tk.StringVar(master=self.inputFrame)
-                entry = tk.Entry(master=self.inputFrame, textvariable=var, font=self.defaultFont)
+                entry = tk.Entry(master=self.inputFrame, textvariable=var, font=self.defaultFont, width=15)
                 entry.grid(row=0, column=2*i+1, sticky="WE")
                 self.inputFrame.grid_columnconfigure(2*i+1, weight=1)
 
