@@ -1939,7 +1939,7 @@ class ANOVA_einfache_varianzanalyse_vollstaendige_Daten(function):
             variableDict["v₁"] = variableDict["N"] - 1
             variableDict["v₂"] = n - variableDict["N"]
             fStern = MSTr / MSE
-            PWert = 1 - f.cdf(fStern)
+            PWert = 1 - f.cdf(fStern, variableDict["v₁"], variableDict["v₂"])
 
             krit = f.ppf(1-variableDict["α"], variableDict["v₁"], variableDict["v₂"])
             result = fStern >= krit
