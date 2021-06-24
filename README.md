@@ -17,5 +17,5 @@ Vorhandenen Funktionen: Alle Konfidenzintervalle aus Kapitel 3, Hypothesentests 
 Funktionen die noch fehlen: Anpassungstests (Kap 4), mehrfaktorielle Anova, der spezielle Tukey-Test für die Regressionsanalyse aus Kapitel 6.3.2 und die "Modelldiagnose durch Residuenanalyse" (6.4)
 
 
-
+\n\n
 Natürlich kann ich nicht für die Richtigkeit der Resultate garantieren, es ist aber alles mit Beispielen aus dem Skriptum und der Aufgabensammlung getestet worden.
