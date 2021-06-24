@@ -10,6 +10,7 @@ Explanation (german):
 4) Das Resultat wird im Fenster angezeigt.
 
 Hinweis 1: Bei bestimmten Funktionen geschieht die Eingabe mancher Eingangswerte (z.B. bei der Regressionsanalyse die Stichprobenwerte) nicht über Eingabefelder sondern über Tabellen. Die Tabellen haben zu Beginn nur eine Zeile und Spalte, durch Klicken auf die unterste (rechteste) Spalte (Zeile) werden neue Spalten (Zeilen) hinzugefügt.
+
 Hinweis 2: Bei den aufwändigeren Funktionen wie ANOVA und Regressionsanalyse werden neben dem Resultat auch viele Werte von Zwischenberechnungen in dem Kommandozeilenfenster, das sich mit der Anwendung öffnet, angezeigt (Ich werde schauen, dass diese Werte auch irgendwann im Fenster angezeigt werden). In der Kommandozeile sollten auch ggf. Fehlermeldungen angezeigt werden. Wenn man mich auf diese im Reiter "Issues" auf Github aufmerksam macht, werde ich schauen, dass ich das Problem beseitige.
 
 Am besten man probiert das Programm einfach einmal aus, in dem meisten Fällen sollte aus selbsterklärend sein.
