@@ -2294,10 +2294,6 @@ class Regressionsanalyse(function):
                 print("x2: ", x)
                 r1 = t.ppf(variableDict["α"]/2, v) * Standardabweichung_e * math.sqrt(np.dot(x, np.dot(P_Matrix, x.transpose())))
                 r2 = t.ppf(variableDict["α"]/2, v) * Standardabweichung_e * math.sqrt(1 + np.dot(x, np.dot(P_Matrix, x.transpose())))
-                print("""t.ppf(variableDict["α"]/2, v): """, t.ppf(variableDict["α"]/2, v))
-                print("np.dot(P_Matrix, x.transpose()): ", np.dot(P_Matrix, x.transpose()))
-                print("np.dot(P_Matrix, x.transpose()): ", np.dot(P_Matrix, x.transpose()))
-                print("math.sqrt(np.dot(x, np.dot(P_Matrix, x.transpose()))): ", math.sqrt(np.dot(x, np.dot(P_Matrix, x.transpose()))))
 
                 data2["1"][f"Zusätzl. Wert {j+1}"] = f"{np.dot(beta_dach, x.transpose())}"
                 data2["2"][f"Zusätzl. Wert {j+1}"] = f"± {abs(r1)}"
