@@ -14,6 +14,7 @@ Hinweis 1: Bei bestimmten Funktionen geschieht die Eingabe mancher Eingangswerte
 Am besten man probiert das Programm einfach einmal aus, in dem meisten Fällen sollte aus selbsterklärend sein.
 
 Vorhandenen Funktionen: Alle Konfidenzintervalle aus Kapitel 3, Hypothesentests aus Kapitel 4, einfaktorielle Anova sowie Fisher LSD und Tukey-Test (5) und Regressionsanalyse inklusive Konfidenz- Prädiktionsintervallen und Test für einen Paramter, eine Gruppe von Parametern und globale Signifikanz (6)
+
 Funktionen die noch fehlen: Anpassungstests (Kap 4), mehrfaktorielle Anova, der spezielle Tukey-Test für die Regressionsanalyse aus Kapitel 6.3.2 und die "Modelldiagnose durch Residuenanalyse" (6.4)
 
 Natürlich kann ich nicht für die Richtigkeit der Resultate garantieren, es ist aber alles mit Beispielen aus dem Skriptum und der Aufgabensammlung getestet worden.
