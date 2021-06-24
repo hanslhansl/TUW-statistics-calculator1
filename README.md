@@ -7,7 +7,7 @@ Explanation (german):
    - Eine Option, die Variable, der berechnet werden soll, auszuwählen. Bei vielen Konfidenzintervallen lässt sich z.B. nach "n", Standarabweichung, alpha und dem Radius der Intervalls auflösen, bei den Tests kann man nur "Ausgang" wählen.
 2) Auswählen der Variable, nach der aufgelöst werden soll. Es erscheinen die benötigten Eingangswerte sowie Eingabefelder um die Werte einzugeben. Wenn man mit der Maus über den Namen der Eingansgwerte fährt, erscheint eine kurze Beschreibung. (siehe Hinweis 1)
 3) Werte einsetzen und "Calculate" klicken.
-4) Das Resultat wird im Fenster angezeigt.
+4) Das Resultat wird im Fenster angezeigt. (siehe Hinweis 2)
 
 Hinweis 1: Bei bestimmten Funktionen geschieht die Eingabe mancher Eingangswerte (z.B. bei der Regressionsanalyse die Stichprobenwerte) nicht über Eingabefelder sondern über Tabellen. Die Tabellen haben zu Beginn nur eine Zeile und Spalte, durch Klicken auf die unterste (rechteste) Spalte (Zeile) werden neue Spalten (Zeilen) hinzugefügt.
 
