@@ -1827,9 +1827,9 @@ class ANOVA_Tukeys_t_test(function):
             result = abs(variableDict["X\u0304₁"] - variableDict["X\u0304₂"]) < q
 
             if result:
-                return {looking_for : "True, X\u0304₁ und X\u0304₂ unterscheiden nicht sich signifikant", "Radius q" : str(q)}
+                return {looking_for : "True, X\u0304₁ und X\u0304₂ unterscheiden nicht sich signifikant", "Q-Wert" : Q_crit, "Radius q" : str(q)}
             elif not result:
-                return {looking_for : "False, X\u0304₁ und X\u0304₂ unterscheiden sich signifikant", "Radius q" : str(q)}
+                return {looking_for : "False, X\u0304₁ und X\u0304₂ unterscheiden sich signifikant", "Q-Wert" : Q_crit, "Radius q" : str(q)}
 
         else:
             raise Exception()
@@ -1939,6 +1939,7 @@ class ANOVA_einfache_varianzanalyse_vollstaendige_Daten(function):
             variableDict["v₁"] = variableDict["N"] - 1
             variableDict["v₂"] = n - variableDict["N"]
             fStern = MSTr / MSE
+            PWert = 1 - f.cdf(fStern)
 
             krit = f.ppf(1-variableDict["α"], variableDict["v₁"], variableDict["v₂"])
             result = fStern >= krit
@@ -2028,11 +2029,11 @@ class ANOVA_einfache_varianzanalyse_vollstaendige_Daten(function):
             if not result:
                 foo = {"data1" : data1,
                 "data2" : data2,
-                looking_for : "True, H₀ wird nicht abgelehnt", "Teststatistik" : fStern, "Kritischer Wert" : krit, "MSTr" : MSTr, "MSE" : MSE, "SSTr" : SSTr, "SSE" : SSE}
+                looking_for : "True, H₀ wird nicht abgelehnt", "Teststatistik" : fStern, "Kritischer Wert" : krit, "P-Wert" : PWert, "MSTr" : MSTr, "MSE" : MSE, "SSTr" : SSTr, "SSE" : SSE}
             elif result:
                 foo = {"data1" : data1,
                 "data2" : data2,
-                looking_for : "False, H₀ wird abgelehnt", "Teststatistik" : fStern, "Kritischer Wert" : krit, "MSTr" : MSTr, "MSE" : MSE, "SSTr" : SSTr, "SSE" : SSE}
+                looking_for : "False, H₀ wird abgelehnt", "Teststatistik" : fStern, "Kritischer Wert" : krit, "P-Wert" : PWert, "MSTr" : MSTr, "MSE" : MSE, "SSTr" : SSTr, "SSE" : SSE}
 
             #print({**foo, **additionalResult})
             return {**foo, **additionalResult}
@@ -2102,6 +2103,7 @@ class Regressionsanalyse(function):
             elif key == "Tukey's Test":
                 if variableDict[key].lower() in ("true", "t", "j", "ja"):
                     variableDict[key] = True
+                    raise Exception("Tukeys Test ist für die Regressionsanalyse noch nicht implementiert.")
                 elif variableDict[key].lower() in ("false", "f", "n", "nein", ""):
                     variableDict[key] = False
                 else:
@@ -2109,9 +2111,9 @@ class Regressionsanalyse(function):
 
             elif key == "große Tabelle":
                 #self.tableList = [[1.0, 5.0, 9.0, 11.0, 3.0], [2.0, 6.0, 11.0, 25.0, 2.0], [3.0, 7.0, 12.0, 13.0, 9.0]]
-                self.tableList = [[0.12, 0.28, 0.55, 0.68, 0.85, 1.02, 1.15, 1.34, None, 1.29, None], [4.0, 8.7, 12.7, 19.1, 21.4, 24.6, 28.9, 29.8, 100, 30.5, 20]]
-                variableDict[key] = self.tableList
-                continue
+                #self.tableList = [[0.12, 0.28, 0.55, 0.68, 0.85, 1.02, 1.15, 1.34, None, 1.29, None], [4.0, 8.7, 12.7, 19.1, 21.4, 24.6, 28.9, 29.8, 100, 30.5, 20]]
+                #variableDict[key] = self.tableList
+                #continue
                 tableModel = variableDict[key]
                 if type(tableModel) != tkt.TableModel:
                     raise Exception(f"{key} must not be of type 'tkt.TableModel' but is {type(tableModel)}")
@@ -2177,15 +2179,15 @@ class Regressionsanalyse(function):
             print("================================")
             print("X_Matrix: \n", X_Matrix)
             print("================================")
-            print("additionalRVs: \n", additionalRVs)
-            print("================================")
             print("X_Matrix transponiert: \n", X_Matrix_trans)
+            print("================================")
+            print("additionalRVs: \n", additionalRVs)
             print("================================")
 
             n = y_Vektor.shape[0]
             if n != X_Matrix.shape[0]:
                 raise Exception()
-            k = X_Matrix.shape[1]
+            k = X_Matrix.shape[1]-1
             p = k + 1
             v = n - p
             print("n: ", n)
@@ -2195,7 +2197,10 @@ class Regressionsanalyse(function):
             print("p: ", p)
             print("================================")
 
-            P_Matrix = np.linalg.inv((np.dot(X_Matrix_trans, X_Matrix)))
+            P_Matrix_vor_invertierung = np.dot(X_Matrix_trans, X_Matrix)
+            print("P_Matrix vor Invertierung: \n", P_Matrix_vor_invertierung)
+            print("================================")
+            P_Matrix = np.linalg.inv(P_Matrix_vor_invertierung)
             print("P_Matrix: \n", P_Matrix)
             print("================================")
 
@@ -2231,7 +2236,7 @@ class Regressionsanalyse(function):
             print("MSE: ", MSE)
             print("================================")
             R_quadrat_Skalar = 1 - SSE / SST # 1 für perfektes Modell, 0 für nutzloses Modell, wird ungenau bei wachsender Modellordnung k
-            print("R_quadrat_Skalar: ", R_quadrat_Skalar)
+            print("Bestimmtheitsmaß R_quadrat_Skalar: ", R_quadrat_Skalar)
             print("================================")
             R_quadrat_angepasst_Skalar = 1 - (n - 1) / (n - p) * (1 - R_quadrat_Skalar) # 1 für perfektes Modell, 0 für nutzloses Modell
             print("R_quadrat_angepasst_Skalar: ", R_quadrat_angepasst_Skalar)
@@ -2289,6 +2294,11 @@ class Regressionsanalyse(function):
                 print("x2: ", x)
                 r1 = t.ppf(variableDict["α"]/2, v) * Standardabweichung_e * math.sqrt(np.dot(x, np.dot(P_Matrix, x.transpose())))
                 r2 = t.ppf(variableDict["α"]/2, v) * Standardabweichung_e * math.sqrt(1 + np.dot(x, np.dot(P_Matrix, x.transpose())))
+                print("""t.ppf(variableDict["α"]/2, v): """, t.ppf(variableDict["α"]/2, v))
+                print("np.dot(P_Matrix, x.transpose()): ", np.dot(P_Matrix, x.transpose()))
+                print("np.dot(P_Matrix, x.transpose()): ", np.dot(P_Matrix, x.transpose()))
+                print("math.sqrt(np.dot(x, np.dot(P_Matrix, x.transpose()))): ", math.sqrt(np.dot(x, np.dot(P_Matrix, x.transpose()))))
+
                 data2["1"][f"Zusätzl. Wert {j+1}"] = f"{np.dot(beta_dach, x.transpose())}"
                 data2["2"][f"Zusätzl. Wert {j+1}"] = f"± {abs(r1)}"
                 data2["3"][f"Zusätzl. Wert {j+1}"] = f"± {abs(r2)}"
@@ -2381,50 +2391,50 @@ class Regressionsanalyse(function):
                 print(text3)
                 additionalResult["\nTukey's Test"] = (str(tukey), )
 
-
-            #Test für Paramtergruppe
-            print("\n\n================================")
-            print("================================")
-            print("Test für Paramtergruppe")
-            print("================================")
-            print("================================")
-            Params = variableDict["Parametergruppe"]
-            NotParams = [i for i in range(X_Matrix.shape[1]) if i not in Params]
-            X_Matrix_r = np.delete(arr=X_Matrix, obj=NotParams, axis=1)
-            print("X_Matrix_r: \n", X_Matrix_r)
-            print("================================")
-            X_Matrix_r_trans = X_Matrix_r.transpose()
-            print("X_Matrix_r_trans: ", X_Matrix_r_trans)
-            print("================================")
-            P_Matrix_r = np.linalg.inv((np.dot(X_Matrix_r_trans, X_Matrix_r)))
-            print("P_Matrix_r: ", P_Matrix_r)
-            print("================================")
-            beta_dach_r = np.dot(P_Matrix_r, np.dot(X_Matrix_r_trans, y_Vektor))
-            print("beta_dach_r: ", beta_dach_r)
-            print("================================")
-            r = len(beta_dach_r)
-            print("r: ", r)
-            print("================================")
-            SSE_r = np.dot(y_Vektor.transpose(), y_Vektor) - np.dot(beta_dach_r.transpose(), np.dot(X_Matrix_r.transpose(), y_Vektor))
-            print("SSE_r: ", SSE_r)
-            print("================================")
-            fStern = ((SSE_r - SSE) / (p - r)) / (SSE / (n - p))
-            print("fStern: ", fStern)
-            print("================================")
-            krit = f.ppf(1-variableDict["α"], p - r, n - p)
-            result = fStern >= krit
-            print("krit: ", krit)
-            print("================================")
-            print("data3: ", data3)
-            print("================================")
-            if not result:
-                additionalResult["Ausgang Paramtergruppe"] = f"True, H₀ wird nicht abgelehnt, alle Parameter β aus der Paramtergruppe unterscheiden sich nicht signifikant von 0, im Modell kann auf β ∈ {Params} verzichtet werden"
-                additionalResult["Teststatistik Paramtergruppe"] = fStern
-                additionalResult["Kritischer Wert Paramtergruppe"] = krit
-            elif result:
-                additionalResult["Ausgang Paramtergruppe"] = f"False, H₀ wird abgelehnt, mindestens ein Parameter β aus der Paramtergruppe unterscheidet sich signifikant von 0, β ∈ {Params} beinflussen das Resultat signifikant"
-                additionalResult["Teststatistik Paramtergruppe"] = fStern
-                additionalResult["Kritischer Wert Paramtergruppe"] = krit
+            if variableDict["Parametergruppe"] != None:
+                #Test für Paramtergruppe
+                print("\n\n================================")
+                print("================================")
+                print("Test für Paramtergruppe")
+                print("================================")
+                print("================================")
+                Params = variableDict["Parametergruppe"]
+                NotParams = [i for i in range(X_Matrix.shape[1]) if i not in Params]
+                X_Matrix_r = np.delete(arr=X_Matrix, obj=NotParams, axis=1)
+                print("X_Matrix_r: \n", X_Matrix_r)
+                print("================================")
+                X_Matrix_r_trans = X_Matrix_r.transpose()
+                print("X_Matrix_r_trans: ", X_Matrix_r_trans)
+                print("================================")
+                P_Matrix_r = np.linalg.inv((np.dot(X_Matrix_r_trans, X_Matrix_r)))
+                print("P_Matrix_r: ", P_Matrix_r)
+                print("================================")
+                beta_dach_r = np.dot(P_Matrix_r, np.dot(X_Matrix_r_trans, y_Vektor))
+                print("beta_dach_r: ", beta_dach_r)
+                print("================================")
+                r = len(beta_dach_r)
+                print("r: ", r)
+                print("================================")
+                SSE_r = np.dot(y_Vektor.transpose(), y_Vektor) - np.dot(beta_dach_r.transpose(), np.dot(X_Matrix_r.transpose(), y_Vektor))
+                print("SSE_r: ", SSE_r)
+                print("================================")
+                fStern = ((SSE_r - SSE) / (p - r)) / (SSE / (n - p))
+                print("fStern: ", fStern)
+                print("================================")
+                krit = f.ppf(1-variableDict["α"], p - r, n - p)
+                result = fStern >= krit
+                print("krit: ", krit)
+                print("================================")
+                print("data3: ", data3)
+                print("================================")
+                if not result:
+                    additionalResult["Ausgang Paramtergruppe"] = f"True, H₀ wird nicht abgelehnt, alle Parameter β aus der Paramtergruppe unterscheiden sich nicht signifikant von 0, im Modell kann auf β ∈ {Params} verzichtet werden"
+                    additionalResult["Teststatistik Paramtergruppe"] = fStern
+                    additionalResult["Kritischer Wert Paramtergruppe"] = krit
+                elif result:
+                    additionalResult["Ausgang Paramtergruppe"] = f"False, H₀ wird abgelehnt, mindestens ein Parameter β aus der Paramtergruppe unterscheidet sich signifikant von 0, β ∈ {Params} beinflussen das Resultat signifikant"
+                    additionalResult["Teststatistik Paramtergruppe"] = fStern
+                    additionalResult["Kritischer Wert Paramtergruppe"] = krit
 
 
 

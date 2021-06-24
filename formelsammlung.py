@@ -191,7 +191,7 @@ class main(tk.Tk):
             if len(value) == 3:
                 tempDict[key] = value[2].get()
             elif len(value) == 1:
-                tempDict[key] = value[0]
+                tempDict[key] = value[0].copy()
 
         try:
             self.resultFrame.destroy()
@@ -425,33 +425,37 @@ def handle_left_click(self, event):
 
 def smallInjection(self, rowclicked, colclicked):
     if rowclicked == self.rows-1:
-        if not all([self.model.getCellRecord(self.model.getRowCount()-1, k) in (None, "") for k in range(self.model.getColumnCount())]):
+        #if not all([self.model.getCellRecord(self.model.getRowCount()-1, k) in (None, "") for k in range(self.model.getColumnCount())]):
+        if True:
             self.addRow()
             self.fakeClick(row=self.rows-2)
-    elif rowclicked < self.rows-1:
+
+    """elif rowclicked < self.rows-1:
         if all([self.model.getCellRecord(self.model.getRowCount()-1, k) in (None, "") for k in range(self.model.getColumnCount())]):
             self.model.deleteRow(self.model.getRowCount()-1)
             self.fakeClick()
-            self.redrawTable()
+            self.redrawTable()"""
 
 
 def bigInjection(self, rowclicked, colclicked):
     if rowclicked >= self.rows-1 or colclicked >= self.cols-1:
         if rowclicked <= self.rows-1 and colclicked <= self.cols-1:
             if rowclicked == self.rows-1:
-                if not all([self.model.getCellRecord(self.model.getRowCount()-1, k) in (None, "") for k in range(self.model.getColumnCount())]):
+                #if not all([self.model.getCellRecord(self.model.getRowCount()-1, k) in (None, "") for k in range(self.model.getColumnCount())]):
+                if True:
                     self.addRow()
                     self.fakeClick(row=self.rows-2)
 
             if colclicked == self.cols-1:
-                if not all([self.model.getCellRecord(k, self.model.getColumnCount()-1) in (None, "") for k in range(self.model.getRowCount())]):
+                #if not all([self.model.getCellRecord(k, self.model.getColumnCount()-1) in (None, "") for k in range(self.model.getRowCount())]):
+                if True:
                     lastcolname = self.model.getColumnLabel(self.cols-1)
                     no, name = lastcolname.split(". ", 1)
                     no = int(no)
                     self.addColumn(f"{no+1}. {name}")
                     self.fakeClick(col=self.cols-2)
 
-    elif colclicked < self.cols-1 and rowclicked < self.rows-1:
+    """elif colclicked < self.cols-1 and rowclicked < self.rows-1:
         allRow = all([self.model.getCellRecord(self.model.getRowCount()-1, k) in (None, "") for k in range(self.model.getColumnCount())])
         allCol = all([self.model.getCellRecord(k, self.model.getColumnCount()-1) in (None, "") for k in range(self.model.getRowCount())])
         if allRow:
@@ -459,7 +463,7 @@ def bigInjection(self, rowclicked, colclicked):
         if allCol:
             self.model.deleteColumn(self.model.getColumnCount()-1)
         self.fakeClick()
-        self.redrawTable()
+        self.redrawTable()"""
 
 
 tkt.TableCanvas.drawTooltip = lambda *args, **kwargs: None
