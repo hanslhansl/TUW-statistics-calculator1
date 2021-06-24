@@ -3,7 +3,7 @@ import math
 import numpy as np
 import tkintertable as tkt
 import pandas as pd
-from statsmodels.sandbox.stats.multicomp import MultiComparison
+from statsmodels.sandbox.stats.multicomp import MultiComparison, get_tukeyQcrit2
 
 #Base class
 class function:
@@ -1774,18 +1774,12 @@ class ANOVA_Fisher_LSD(function):
 class ANOVA_Tukeys_t_test(function):
     name = "ANOVA - Tukey's T-Test"
     description = """Tukey's T-Test zwischen zwei Werten
-    Es gibt für Python leider keine "Studentized range distribution". Daher muss der entsprechende Wert woanders, z.B. aus einer Tabelle (B.S. 138/139), abgelesen werden.
-    Einen vollständigen Tukey's T-Test gibt es bei 'ANOVA - Einfache Varianzanalyse mit vollständiger Dateneingabe', dafür benötigt es jedoch die vollständigen Stichproben.
-    Man kann den Wert dann hier eintragen, damit man sich wenigstens das Rechnen erspart.
-    Vorgehensweise:
-    1) Alle Werte eintragen, für "Q" beliebigen Wert, z.B. "1" einsetzen
-    2) Berechnen
-    3) Das Programm sagt, für welchen Wert und für welche Freiheitsgrade der Q-Wert abgelesen werden soll
-    4) Den tatsächlichen Q-Wert einsetzen und erneut berechnen
+    Bei gleichen Stichprobenumfängen im Experiment gilt n = N*M.
+
     B.S. 96"""
     def __init__(self):
-        self.variableNames = ["X\u0304₁", "X\u0304₂", "M₁", "M₂", "MSE", "N", "n", "α", "Q", "Ausgang"]
-        self.necessaryValues = {"Ausgang" : ["X\u0304₁", "X\u0304₂", "M₁", "M₂", "N", "n", "MSE", "α", "Q"]}
+        self.variableNames = ["X\u0304₁", "X\u0304₂", "M₁", "M₂", "MSE", "N", "n", "α", "Ausgang"]
+        self.necessaryValues = {"Ausgang" : ["X\u0304₁", "X\u0304₂", "M₁", "M₂", "N", "n", "MSE", "α"]}
         self.extendedExplanations = {"X\u0304₁" : "Durchschnitt Probe 1",
         "X\u0304₂" : "Durchschnitt Probe 2",
         "M₁" : "Anzahl der Werte Probe 1",
@@ -1794,7 +1788,6 @@ class ANOVA_Tukeys_t_test(function):
         "n" : "Gesamtzahl aller Messungen",
         "MSE" : "Mittlerer quadratischer Fehler",
         "α" : "Signifikanzniveau des Tests",
-        "Q" : "Wert der Studentized range distribution",
         "Ausgang" : "'true' für nicht abgelehnt, 'false' für abgelehnt"}
 
     def __call__(self, variableDict):
@@ -1823,18 +1816,20 @@ class ANOVA_Tukeys_t_test(function):
     def defaultCall(self, variableDict, looking_for):
         if looking_for == "Ausgang":
             print("looking for Ausgang")
-            q = variableDict["Q"] * math.sqrt(variableDict["MSE"] / 2 * (1 / variableDict["M₁"] + 1 / variableDict["M₂"]))
+
             variableDict["v₁"] = variableDict["N"]
             variableDict["v₂"] = variableDict["n"] - variableDict["N"]
 
-            result = abs(variableDict["X\u0304₁"] - variableDict["X\u0304₂"]) > q
+            Q_crit = get_tukeyQcrit2(alpha=variableDict["α"], k=variableDict["v₁"], df=variableDict["v₂"])
 
-            benötigteTeststatistikQ = f"""Q({variableDict["α"]}; {variableDict["v₁"]}; {variableDict["v₂"]})"""
+            q = Q_crit * math.sqrt(variableDict["MSE"] / 2 * (1 / variableDict["M₁"] + 1 / variableDict["M₂"]))
 
-            if not result:
-                return {looking_for : "True, X\u0304₁ und X\u0304₂ unterscheiden nicht sich signifikant", "benötigte Teststatistik Q" : benötigteTeststatistikQ, "Radius q" : str(q)}
-            elif result:
-                return {looking_for : "False, X\u0304₁ und X\u0304₂ unterscheiden sich signifikant", "benötigte Teststatistik Q" : benötigteTeststatistikQ, "Radius q" : str(q)}
+            result = abs(variableDict["X\u0304₁"] - variableDict["X\u0304₂"]) < q
+
+            if result:
+                return {looking_for : "True, X\u0304₁ und X\u0304₂ unterscheiden nicht sich signifikant", "Radius q" : str(q)}
+            elif not result:
+                return {looking_for : "False, X\u0304₁ und X\u0304₂ unterscheiden sich signifikant", "Radius q" : str(q)}
 
         else:
             raise Exception()

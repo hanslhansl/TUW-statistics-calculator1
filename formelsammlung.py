@@ -1,4 +1,4 @@
-import Pmw as PMW
+import PMW as PMW
 import sys
 import inspect
 import tkinter as tk
